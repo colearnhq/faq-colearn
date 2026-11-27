@@ -238,18 +238,6 @@
   }
   .btn-no:hover { border-color: var(--blue); color: var(--blue); }
 
-  /* ── Live Chat button ── */
-  .bubble-bot .btn-live-chat {
-    display: inline-flex; align-items: center;
-    background: var(--blue); color: #fff;
-    border: none; border-radius: 999px;
-    padding: 9px 18px; font-size: 13px; font-weight: 600;
-    cursor: pointer; font-family: inherit;
-    text-decoration: none; margin-top: 6px;
-    transition: background 0.15s;
-  }
-  .bubble-bot .btn-live-chat:hover { background: var(--blue-dark); }
-
   /* ── Typing indicator ── */
   .typing { display: flex; align-items: center; gap: 4px; padding: 12px 14px; }
   .dot { width: 7px; height: 7px; background: #B0B8C1; border-radius: 50%; animation: bounce 1.2s infinite; }
@@ -320,7 +308,6 @@
 // ─────────────────────────────────────────────
 const FAQ_JSON_URL = '/api/faq';
 const LOG_URL = '/api/log';
-const LIVE_CHAT_URL = 'https://colearn.id/kakak-siaga';
 // ─────────────────────────────────────────────
 
 const msgs  = document.getElementById('messages');
@@ -442,11 +429,6 @@ async function logSession(outcome) {
   } catch(e) { console.warn('Log failed:', e); }
 }
 
-// Keep the existing outcome name for compatibility with FAQ reports.
-msgs.addEventListener('click', (e) => {
-  if (e.target.closest('.btn-live-chat')) logSession('wa_click');
-});
-
 // ── Solved / not solved flow ──────────────────
 function addBackToMenuButton() {
   const backWrap = document.createElement('div');
@@ -488,6 +470,13 @@ async function showSolvedQuestion(msg = 'Silakan coba langkah di atas. Apakah ke
   btns.querySelector('.btn-no').onclick  = () => handleSolved(false, btns);
 }
 
+
+function liveChatHelp() {
+  return `<b>Masih butuh bantuan?</b><br>
+    Silakan kembali ke Live Chat untuk melanjutkan percakapan dengan Kakak Siaga, ya.<br><br>
+    Pesan akan dibalas pada jam operasional (Senin–Jumat, 11.00–20.00 WIB).`;
+}
+
 async function handleSolved(yes, btns) {
   btns.remove();
   if (yes) {
@@ -501,10 +490,7 @@ async function handleSolved(yes, btns) {
     addUserBubble('Belum, masih terkendala ❌');
     logSession('not_solved');
     await wait(400); showTyping(); await wait(700); removeTyping();
-    addBotBubble(`Tenang, Kakak Siaga siap bantu lebih lanjut! 🙋<br><br>Pesan akan dibalas pada jam operasional: Senin–Jumat 11.00–20.00 WIB.<br><br>
-      <a class="btn-live-chat" href="${LIVE_CHAT_URL}" target="_blank" rel="noopener">
-        Chat Kakak Siaga via Live Chat
-      </a>`);
+    addBotBubble(liveChatHelp());
     await wait(400);
     const backWrap = document.createElement('div');
     backWrap.className = 'chips-wrap chips-single';
@@ -623,10 +609,7 @@ async function handleUrgent(item) {
   trackStep(item);
   logSession('viewed');
   await wait(400); showTyping(); await wait(600); removeTyping();
-  addBotBubble(`${item.answer}<br><br>Pesan akan dibalas pada jam operasional: Senin–Jumat 11.00–20.00 WIB.<br><br>
-    <a class="btn-live-chat" href="${LIVE_CHAT_URL}" target="_blank" rel="noopener">
-      Chat Kakak Siaga via Live Chat
-    </a>`);
+  addBotBubble(`${item.answer}<br><br>${liveChatHelp()}`);
   logSession('not_solved');
   await wait(400);
   const backWrap = document.createElement('div');
